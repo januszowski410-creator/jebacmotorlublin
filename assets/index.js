@@ -48,19 +48,52 @@ imageInput.addEventListener('change', (event) => {
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
 
-    upload.removeAttribute("selected")
+    upload.removeAttribute("selected");
 
     var file = imageInput.files[0];
-    var data = new FormData();
-    data.append("image", file);
 
-    fetch('	https://api.imgur.com/3/image' ,{
-        method: 'POST',
-        headers: {
-            'Authorization': 'Client-ID dcff9593902d0bb'
-        },
+    if (!file) {
+        upload.classList.remove("upload_loading");
+        return;
+    }
+
+    var data = new FormData();
+
+    data.append("file", file);
+    data.append("upload_preset", "obywatel_upload");
+
+    fetch("https://api.cloudinary.com/v1_1/gqcgpyah/image/upload", {
+        method: "POST",
         body: data
     })
+    .then(result => {
+        if (!result.ok) {
+            throw new Error("Cloudinary HTTP " + result.status);
+        }
+        return result.json();
+    })
+    .then(response => {
+
+        var url = response.secure_url;
+
+        upload.classList.remove("error_shown");
+        upload.setAttribute("selected", url);
+        upload.classList.add("upload_loaded");
+        upload.classList.remove("upload_loading");
+        upload.querySelector(".upload_uploaded").src = url;
+
+    })
+    .catch(error => {
+
+        console.error("Cloudinary upload error:", error);
+
+        upload.classList.remove("upload_loading");
+        upload.classList.remove("upload_loaded");
+        upload.classList.add("error_shown");
+
+    });
+
+})
     .then(result => result.json())
     .then(response => {
         
