@@ -4,7 +4,6 @@ var params = new URLSearchParams(window.location.search);
 function sendTo(url){
     location.href = `/jebacmotorlublin/${url}.html?` + params;
 }
-}
 
 document.querySelectorAll(".bottom_element_grid").forEach((element) => {
     element.addEventListener('click', () => {
