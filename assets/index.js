@@ -1,6 +1,6 @@
 var selector = document.querySelector(".selector_box");
 
-selector.addEventListener('click', () => {
+selector.addEventListener("click", () => {
     if (selector.classList.contains("selector_open")) {
         selector.classList.remove("selector_open");
     } else {
@@ -8,20 +8,24 @@ selector.addEventListener('click', () => {
     }
 });
 
+
 document.querySelectorAll(".date_input").forEach((element) => {
-    element.addEventListener('click', () => {
+    element.addEventListener("click", () => {
         document.querySelector(".date").classList.remove("error_shown");
     });
 });
 
+
 var sex = "m";
 
+
 document.querySelectorAll(".selector_option").forEach((option) => {
-    option.addEventListener('click', () => {
+    option.addEventListener("click", () => {
         sex = option.id;
         document.querySelector(".selected_text").innerHTML = option.innerHTML;
     });
 });
+
 
 var upload = document.querySelector(".upload");
 
@@ -29,29 +33,35 @@ var imageInput = document.createElement("input");
 imageInput.type = "file";
 imageInput.accept = ".jpeg,.jpg,.png,.gif";
 
+
 document.querySelectorAll(".input_holder").forEach((element) => {
 
     var input = element.querySelector(".input");
 
-    input.addEventListener('click', () => {
+    input.addEventListener("click", () => {
         element.classList.remove("error_shown");
     });
 
 });
 
 
-/* UPLOADCARE */
+/* =========================
+   UPLOADCARE
+   ========================= */
 
-const UPLOADCARE_PUBLIC_KEY = "5ad36bf575bbe28f510e";
+var UPLOADCARE_PUBLIC_KEY = "5ad36bf575bbe28f510e";
 
 
-upload.addEventListener('click', () => {
+upload.addEventListener("click", () => {
+
     imageInput.click();
+
     upload.classList.remove("error_shown");
+
 });
 
 
-imageInput.addEventListener('change', async () => {
+imageInput.addEventListener("change", async () => {
 
     var file = imageInput.files[0];
 
@@ -59,15 +69,29 @@ imageInput.addEventListener('change', async () => {
         return;
     }
 
+
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
     upload.removeAttribute("selected");
 
+
     var data = new FormData();
 
-    data.append("UPLOADCARE_PUB_KEY", UPLOADCARE_PUBLIC_KEY);
-    data.append("UPLOADCARE_STORE", "auto");
-    data.append("file", file);
+    data.append(
+        "UPLOADCARE_PUB_KEY",
+        UPLOADCARE_PUBLIC_KEY
+    );
+
+    data.append(
+        "UPLOADCARE_STORE",
+        "auto"
+    );
+
+    data.append(
+        "file",
+        file
+    );
+
 
     try {
 
@@ -79,61 +103,105 @@ imageInput.addEventListener('change', async () => {
             }
         );
 
+
         var response = await result.json();
 
-        console.log("Uploadcare response:", response);
+        console.log("Uploadcare:", response);
+
 
         if (!result.ok || !response.file) {
+
             throw new Error(
                 response.detail ||
                 response.error ||
                 "Nie udało się przesłać zdjęcia."
             );
+
         }
+
 
         var uuid = response.file;
 
-        var url = "https://ucarecdn.com/" + uuid + "/";
+        var url =
+            "https://ucarecdn.com/" +
+            uuid +
+            "/";
+
 
         upload.classList.remove("error_shown");
-        upload.setAttribute("selected", url);
+
+        upload.setAttribute(
+            "selected",
+            url
+        );
+
         upload.classList.add("upload_loaded");
+
         upload.classList.remove("upload_loading");
 
-        upload.querySelector(".upload_uploaded").src = url;
 
-        console.log("Upload zakończony pomyślnie:", url);
+        var uploadedImage =
+            upload.querySelector(".upload_uploaded");
+
+        if (uploadedImage) {
+            uploadedImage.src = url;
+        }
+
+
+        console.log(
+            "Upload zakończony:",
+            url
+        );
+
 
     } catch (error) {
 
-        console.error("Uploadcare error:", error);
+        console.error(
+            "Uploadcare error:",
+            error
+        );
+
 
         upload.classList.remove("upload_loading");
+
         upload.classList.remove("upload_loaded");
+
         upload.removeAttribute("selected");
 
         upload.classList.add("error_shown");
+
 
         alert(
             "Nie udało się przesłać zdjęcia.\n\n" +
             error.message
         );
+
     }
 
 });
 
 
-document.querySelector(".go").addEventListener('click', () => {
+/* =========================
+   FORMULARZ
+   ========================= */
+
+document.querySelector(".go").addEventListener("click", () => {
 
     var empty = [];
 
     var params = new URLSearchParams();
 
-    params.set("sex", sex);
+
+    params.set(
+        "sex",
+        sex
+    );
+
 
     if (!upload.hasAttribute("selected")) {
 
         empty.push(upload);
+
         upload.classList.add("error_shown");
 
     } else {
@@ -145,12 +213,19 @@ document.querySelector(".go").addEventListener('click', () => {
 
     }
 
+
     var birthday = "";
+
     var dateEmpty = false;
+
 
     document.querySelectorAll(".date_input").forEach((element) => {
 
-        birthday = birthday + "." + element.value;
+        birthday =
+            birthday +
+            "." +
+            element.value;
+
 
         if (isEmpty(element.value)) {
             dateEmpty = true;
@@ -158,11 +233,14 @@ document.querySelector(".go").addEventListener('click', () => {
 
     });
 
+
     birthday = birthday.substring(1);
+
 
     if (dateEmpty) {
 
-        var dateElement = document.querySelector(".date");
+        var dateElement =
+            document.querySelector(".date");
 
         dateElement.classList.add("error_shown");
 
@@ -170,13 +248,19 @@ document.querySelector(".go").addEventListener('click', () => {
 
     } else {
 
-        params.set("birthday", birthday);
+        params.set(
+            "birthday",
+            birthday
+        );
 
     }
 
+
     document.querySelectorAll(".input_holder").forEach((element) => {
 
-        var input = element.querySelector(".input");
+        var input =
+            element.querySelector(".input");
+
 
         if (isEmpty(input.value)) {
 
@@ -186,11 +270,15 @@ document.querySelector(".go").addEventListener('click', () => {
 
         } else {
 
-            params.set(input.id, input.value);
+            params.set(
+                input.id,
+                input.value
+            );
 
         }
 
     });
+
 
     if (empty.length != 0) {
 
@@ -207,25 +295,41 @@ document.querySelector(".go").addEventListener('click', () => {
 
 function isEmpty(value) {
 
-    let pattern = /^\s*$/;
+    var pattern = /^\s*$/;
 
     return pattern.test(value);
 
 }
 
 
-/* POPRAWIONE DLA GITHUB PAGES */
+/* =========================
+   GITHUB PAGES
+   ========================= */
 
 function forwardToId(params) {
 
-    location.href = "./id.html?" + params;
+    var nextPage =
+        new URL(
+            "/jebacmotorlublin/id.html",
+            window.location.origin
+        );
+
+    nextPage.search = params.toString();
+
+    window.location.href = nextPage.href;
 
 }
 
 
-var guide = document.querySelector(".guide_holder");
+/* =========================
+   GUIDE
+   ========================= */
 
-guide.addEventListener('click', () => {
+var guide =
+    document.querySelector(".guide_holder");
+
+
+guide.addEventListener("click", () => {
 
     if (guide.classList.contains("unfolded")) {
 
