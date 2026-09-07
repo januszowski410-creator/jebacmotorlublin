@@ -1,112 +1,210 @@
-
 var selector = document.querySelector(".selector_box");
+
 selector.addEventListener('click', () => {
-    if (selector.classList.contains("selector_open")){
-        selector.classList.remove("selector_open")
-    }else{
-        selector.classList.add("selector_open")
+    if (selector.classList.contains("selector_open")) {
+        selector.classList.remove("selector_open");
+    } else {
+        selector.classList.add("selector_open");
     }
-})
+});
+
 
 document.querySelectorAll(".date_input").forEach((element) => {
-    element.addEventListener('click', () => {
-        document.querySelector(".date").classList.remove("error_shown")
-    })
-})
 
-var sex = "m"
+    element.addEventListener('click', () => {
+        document.querySelector(".date").classList.remove("error_shown");
+    });
+
+});
+
+
+var sex = "m";
+
 
 document.querySelectorAll(".selector_option").forEach((option) => {
+
     option.addEventListener('click', () => {
+
         sex = option.id;
+
         document.querySelector(".selected_text").innerHTML = option.innerHTML;
-    })
-})
+
+    });
+
+});
+
 
 var upload = document.querySelector(".upload");
 
 var imageInput = document.createElement("input");
+
 imageInput.type = "file";
-imageInput.accept = ".jpeg,.png,.gif";
+imageInput.accept = ".jpeg,.jpg,.png,.gif";
 
 document.querySelectorAll(".input_holder").forEach((element) => {
 
     var input = element.querySelector(".input");
+
     input.addEventListener('click', () => {
         element.classList.remove("error_shown");
-    })
+    });
 
 });
+
+
+/*
+    UPLOADCARE
+*/
+
+const UPLOADCARE_PUBLIC_KEY = "5ad36bf575bbe28f510e";
+
 
 upload.addEventListener('click', () => {
+
     imageInput.click();
-    upload.classList.remove("error_shown")
+
+    upload.classList.remove("error_shown");
+
 });
 
-imageInput.addEventListener('change', (event) => {
+
+imageInput.addEventListener('change', async (event) => {
+
+    var file = imageInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    /*
+        Włącz loading
+    */
 
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
 
     upload.removeAttribute("selected");
 
-    var file = imageInput.files[0];
 
-    if (!file) {
-        upload.classList.remove("upload_loading");
-        return;
-    }
+    /*
+        Przygotowanie formularza Uploadcare
+    */
 
     var data = new FormData();
 
+    data.append("UPLOADCARE_PUB_KEY", UPLOADCARE_PUBLIC_KEY);
+    data.append("UPLOADCARE_STORE", "auto");
     data.append("file", file);
-    data.append("upload_preset", "obywatel_upload");
 
-    fetch("https://api.cloudinary.com/v1_1/gqcgpyah/image/upload", {
-        method: "POST",
-        body: data
-    })
-    .then(result => {
-        if (!result.ok) {
-            throw new Error("Cloudinary HTTP " + result.status);
+
+    try {
+
+        /*
+            Upload do Uploadcare
+        */
+
+        var result = await fetch(
+            "https://upload.uploadcare.com/base/",
+            {
+                method: "POST",
+                body: data
+            }
+        );
+
+
+        /*
+            Pobranie odpowiedzi
+        */
+
+        var response = await result.json();
+
+
+        console.log("Uploadcare response:", response);
+
+
+        /*
+            Sprawdzenie błędu
+        */
+
+        if (!result.ok || !response.file) {
+
+            throw new Error(
+                response.detail ||
+                response.error ||
+                "Nie udało się przesłać zdjęcia."
+            );
+
         }
-        return result.json();
-    })
-    .then(response => {
 
-        var url = response.secure_url;
+
+        /*
+            UUID przesłanego pliku
+        */
+
+        var uuid = response.file;
+
+
+        /*
+            URL pliku
+        */
+
+        var url = "https://ucarecdn.com/" + uuid + "/";
+
+
+        /*
+            Sukces
+        */
 
         upload.classList.remove("error_shown");
+
         upload.setAttribute("selected", url);
+
         upload.classList.add("upload_loaded");
+
         upload.classList.remove("upload_loading");
+
         upload.querySelector(".upload_uploaded").src = url;
 
-    })
-    .catch(error => {
 
-        console.error("Cloudinary upload error:", error);
+        console.log("Upload zakończony pomyślnie:", url);
+
+
+    } catch (error) {
+
+        /*
+            Błąd uploadu
+        */
+
+        console.error("Uploadcare error:", error);
+
+
+        /*
+            Wyłącz loading
+        */
 
         upload.classList.remove("upload_loading");
+
         upload.classList.remove("upload_loaded");
+
+        upload.removeAttribute("selected");
+
+
+        /*
+            Pokaż błąd
+        */
+
         upload.classList.add("error_shown");
 
-    });
 
-})
-    .then(result => result.json())
-    .then(response => {
-        
-        var url = response.data.link;
-        upload.classList.remove("error_shown")
-        upload.setAttribute("selected", url);
-        upload.classList.add("upload_loaded");
-        upload.classList.remove("upload_loading");
-        upload.querySelector(".upload_uploaded").src = url;
+        alert(
+            "Nie udało się przesłać zdjęcia.\n\n" +
+            error.message
+        );
 
-    })
+    }
 
-})
+});
+
 
 document.querySelector(".go").addEventListener('click', () => {
 
@@ -114,75 +212,125 @@ document.querySelector(".go").addEventListener('click', () => {
 
     var params = new URLSearchParams();
 
-    params.set("sex", sex)
-    if (!upload.hasAttribute("selected")){
+
+    params.set("sex", sex);
+
+
+    if (!upload.hasAttribute("selected")) {
+
         empty.push(upload);
-        upload.classList.add("error_shown")
-    }else{
-        params.set("image", upload.getAttribute("selected"))
+
+        upload.classList.add("error_shown");
+
+    } else {
+
+        params.set(
+            "image",
+            upload.getAttribute("selected")
+        );
+
     }
 
+
     var birthday = "";
+
     var dateEmpty = false;
+
+
     document.querySelectorAll(".date_input").forEach((element) => {
-        birthday = birthday + "." + element.value
-        if (isEmpty(element.value)){
+
+        birthday = birthday + "." + element.value;
+
+        if (isEmpty(element.value)) {
             dateEmpty = true;
         }
-    })
+
+    });
+
 
     birthday = birthday.substring(1);
 
-    if (dateEmpty){
+
+    if (dateEmpty) {
+
         var dateElement = document.querySelector(".date");
+
         dateElement.classList.add("error_shown");
+
         empty.push(dateElement);
-    }else{
-        params.set("birthday", birthday)
+
+    } else {
+
+        params.set("birthday", birthday);
+
     }
+
 
     document.querySelectorAll(".input_holder").forEach((element) => {
 
         var input = element.querySelector(".input");
 
-        if (isEmpty(input.value)){
+
+        if (isEmpty(input.value)) {
+
             empty.push(element);
+
             element.classList.add("error_shown");
-        }else{
-            params.set(input.id, input.value)
+
+        } else {
+
+            params.set(
+                input.id,
+                input.value
+            );
+
         }
 
-    })
+    });
 
-    if (empty.length != 0){
+
+    if (empty.length != 0) {
+
         empty[0].scrollIntoView();
-    }else{
+
+    } else {
 
         forwardToId(params);
+
     }
 
 });
 
-function isEmpty(value){
 
-    let pattern = /^\s*$/
+function isEmpty(value) {
+
+    let pattern = /^\s*$/;
+
     return pattern.test(value);
 
 }
 
-function forwardToId(params){
 
-    location.href = "/id?" + params
+function forwardToId(params) {
+
+    location.href = "/id?" + params;
 
 }
 
+
 var guide = document.querySelector(".guide_holder");
+
+
 guide.addEventListener('click', () => {
 
-    if (guide.classList.contains("unfolded")){
+    if (guide.classList.contains("unfolded")) {
+
         guide.classList.remove("unfolded");
-    }else{
+
+    } else {
+
         guide.classList.add("unfolded");
+
     }
 
-})
+});
