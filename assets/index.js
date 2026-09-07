@@ -8,36 +8,24 @@ selector.addEventListener('click', () => {
     }
 });
 
-
 document.querySelectorAll(".date_input").forEach((element) => {
-
     element.addEventListener('click', () => {
         document.querySelector(".date").classList.remove("error_shown");
     });
-
 });
-
 
 var sex = "m";
 
-
 document.querySelectorAll(".selector_option").forEach((option) => {
-
     option.addEventListener('click', () => {
-
         sex = option.id;
-
         document.querySelector(".selected_text").innerHTML = option.innerHTML;
-
     });
-
 });
-
 
 var upload = document.querySelector(".upload");
 
 var imageInput = document.createElement("input");
-
 imageInput.type = "file";
 imageInput.accept = ".jpeg,.jpg,.png,.gif";
 
@@ -52,23 +40,18 @@ document.querySelectorAll(".input_holder").forEach((element) => {
 });
 
 
-/*
-    UPLOADCARE
-*/
+/* UPLOADCARE */
 
 const UPLOADCARE_PUBLIC_KEY = "5ad36bf575bbe28f510e";
 
 
 upload.addEventListener('click', () => {
-
     imageInput.click();
-
     upload.classList.remove("error_shown");
-
 });
 
 
-imageInput.addEventListener('change', async (event) => {
+imageInput.addEventListener('change', async () => {
 
     var file = imageInput.files[0];
 
@@ -76,19 +59,9 @@ imageInput.addEventListener('change', async (event) => {
         return;
     }
 
-    /*
-        Włącz loading
-    */
-
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
-
     upload.removeAttribute("selected");
-
-
-    /*
-        Przygotowanie formularza Uploadcare
-    */
 
     var data = new FormData();
 
@@ -96,12 +69,7 @@ imageInput.addEventListener('change', async (event) => {
     data.append("UPLOADCARE_STORE", "auto");
     data.append("file", file);
 
-
     try {
-
-        /*
-            Upload do Uploadcare
-        */
 
         var result = await fetch(
             "https://upload.uploadcare.com/base/",
@@ -111,96 +79,45 @@ imageInput.addEventListener('change', async (event) => {
             }
         );
 
-
-        /*
-            Pobranie odpowiedzi
-        */
-
         var response = await result.json();
-
 
         console.log("Uploadcare response:", response);
 
-
-        /*
-            Sprawdzenie błędu
-        */
-
         if (!result.ok || !response.file) {
-
             throw new Error(
                 response.detail ||
                 response.error ||
                 "Nie udało się przesłać zdjęcia."
             );
-
         }
-
-
-        /*
-            UUID przesłanego pliku
-        */
 
         var uuid = response.file;
 
-
-        /*
-            URL pliku
-        */
-
         var url = "https://ucarecdn.com/" + uuid + "/";
 
-
-        /*
-            Sukces
-        */
-
         upload.classList.remove("error_shown");
-
         upload.setAttribute("selected", url);
-
         upload.classList.add("upload_loaded");
-
         upload.classList.remove("upload_loading");
 
         upload.querySelector(".upload_uploaded").src = url;
 
-
         console.log("Upload zakończony pomyślnie:", url);
-
 
     } catch (error) {
 
-        /*
-            Błąd uploadu
-        */
-
         console.error("Uploadcare error:", error);
 
-
-        /*
-            Wyłącz loading
-        */
-
         upload.classList.remove("upload_loading");
-
         upload.classList.remove("upload_loaded");
-
         upload.removeAttribute("selected");
 
-
-        /*
-            Pokaż błąd
-        */
-
         upload.classList.add("error_shown");
-
 
         alert(
             "Nie udało się przesłać zdjęcia.\n\n" +
             error.message
         );
-
     }
 
 });
@@ -212,14 +129,11 @@ document.querySelector(".go").addEventListener('click', () => {
 
     var params = new URLSearchParams();
 
-
     params.set("sex", sex);
-
 
     if (!upload.hasAttribute("selected")) {
 
         empty.push(upload);
-
         upload.classList.add("error_shown");
 
     } else {
@@ -231,11 +145,8 @@ document.querySelector(".go").addEventListener('click', () => {
 
     }
 
-
     var birthday = "";
-
     var dateEmpty = false;
-
 
     document.querySelectorAll(".date_input").forEach((element) => {
 
@@ -247,9 +158,7 @@ document.querySelector(".go").addEventListener('click', () => {
 
     });
 
-
     birthday = birthday.substring(1);
-
 
     if (dateEmpty) {
 
@@ -265,11 +174,9 @@ document.querySelector(".go").addEventListener('click', () => {
 
     }
 
-
     document.querySelectorAll(".input_holder").forEach((element) => {
 
         var input = element.querySelector(".input");
-
 
         if (isEmpty(input.value)) {
 
@@ -279,15 +186,11 @@ document.querySelector(".go").addEventListener('click', () => {
 
         } else {
 
-            params.set(
-                input.id,
-                input.value
-            );
+            params.set(input.id, input.value);
 
         }
 
     });
-
 
     if (empty.length != 0) {
 
@@ -311,15 +214,16 @@ function isEmpty(value) {
 }
 
 
+/* POPRAWIONE DLA GITHUB PAGES */
+
 function forwardToId(params) {
 
-    location.href = "/id?" + params;
+    location.href = "./id.html?" + params;
 
 }
 
 
 var guide = document.querySelector(".guide_holder");
-
 
 guide.addEventListener('click', () => {
 
