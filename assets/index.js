@@ -123,7 +123,7 @@ imageInput.addEventListener("change", async () => {
         var uuid = response.file;
 
         var url =
-            "https://ucarecdn.com/" +
+            "https://1t2ausm0uk.ucarecd.net/" +
             uuid +
             "/";
 
